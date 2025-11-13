@@ -1,269 +1,253 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toko Buah Segar Online | Checkout</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
+document.addEventListener('DOMContentLoaded', function() {
 
-    <header>
-        <div class="container header-content">
-            <h1>Toko Buah Segar 🛒</h1>
-            <nav>
-                <a href="#produk">Produk</a>
-                <a href="#cara-pesan">Cara Pesan</a>
-            </nav>
-        </div>
-    </header>
+    // --- 1. Selektor Elemen Penting ---
+    const productButtons = document.querySelectorAll('.tambah-keranjang');
+    const paymentRadios = document.querySelectorAll('input[name="metode_bayar"]');
+    const detailContainers = document.querySelectorAll('.detail-bayar');
+    
+    // Elemen Tampilan Checkout
+    const cartList = document.getElementById('daftar-keranjang');
+    const totalBelanjaSpan = document.getElementById('total-belanja');
+    const ongkirSpan = document.getElementById('ongkir');
+    const grandTotalSpan = document.getElementById('grand-total');
+    
+    // Elemen Form dan Peringatan
+    const checkoutForm = document.getElementById('pembayaran-form');
+    const checkoutButton = document.getElementById('checkout-button');
+    const keranjangPeringatan = document.getElementById('peringatan-keranjang');
+    
+    // --- 2. Variabel Status Keranjang & Biaya ---
+    let cart = [];
+    const SHIPPING_COST = 10000;
+    const COD_FEE = 5000;
+    let currentOngkir = SHIPPING_COST;
+    let currentFee = 0;
 
-    <main>
-        <section id="produk" class="container">
-            <h2>Buah Segar Pilihan 🍎🍌</h2>
-            <div class="produk-grid">
-                <div class="produk-item">
-                    <img src="applefuji.png" alt="Apel Fuji">
-                    <h3>Apel Fuji Premium</h3>
-                    <p class="deskripsi">Manis renyah, kualitas impor terbaik.</p>
-                    <p class="harga" data-price="35000">Rp 35.000 / kg</p>
-                    <button class="tambah-keranjang" data-id="1" data-nama="Apel Fuji Premium" data-harga="35000">Tambah ke Keranjang</button>
-                </div>
-                <div class="produk-item">
-                    <img src="pisangg.jpg" alt="Pisang Cavendish">
-                    <h3>Pisang Cavendish</h3>
-                    <p class="deskripsi">Kaya energi, cocok untuk segala usia.</p>
-                    <p class="harga" data-price="20000">Rp 20.000 / sisir</p>
-                    <button class="tambah-keranjang" data-id="2" data-nama="Pisang Cavendish" data-harga="20000">Tambah ke Keranjang</button>
-                </div>
-                <div class="produk-item">
-                    <img src="jerukk.jpg" alt="Jeruk Sunkist">
-                    <h3>Jeruk Sunkist</h3>
-                    <p class="deskripsi">Segar dan kaya Vitamin C.</p>
-                    <p class="harga" data-price="25000">Rp 25.000 / kg</p>
-                    <button class="tambah-keranjang" data-id="3" data-nama="Jeruk Sunkist" data-harga="25000">Tambah ke Keranjang</button>
-                </div>
-            </div>
-        </section>
+
+    // --- 3. Fungsi Utility: Formatting Harga ---
+
+    // Fungsi untuk memformat harga ke Rupiah
+    function formatRupiah(number) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0
+        }).format(number);
+    }
+
+    // --- 4. Fungsi Logika Keranjang & Total ---
+
+    function calculateTotals() {
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        const finalTotal = subtotal + currentOngkir + currentFee;
         
-        <hr>
+        // Update Tampilan
+        totalBelanjaSpan.textContent = formatRupiah(subtotal);
+        ongkirSpan.textContent = formatRupiah(currentOngkir);
+        grandTotalSpan.textContent = formatRupiah(finalTotal);
 
-        <section id="checkout" class="container">
-            <h2>Keranjang & Checkout 🧺</h2>
-            <div class="checkout-content">
-                
-                <div class="keranjang-detail">
-                    <h3>Daftar Belanja Anda</h3>
-                    <ul id="daftar-keranjang">
-                        </ul>
-                    <p class="keranjang-total">Total Belanja: <span id="total-belanja">Rp 0</span></p>
-                    <p class="keranjang-total">Ongkos Kirim: <span id="ongkir">Rp 10.000</span></p>
-                    <p class="grand-total">**Total Bayar:** <span id="grand-total">**Rp 10.000**</span></p>
-                </div>
-
-                <form id="pembayaran-form">
-                    <h3>Informasi Pengiriman</h3>
-                    <div class="form-group">
-                        <label for="nama">Nama Lengkap</label>
-                        <input type="text" id="nama" name="nama" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="alamat">Alamat Lengkap</label>
-                        <textarea id="alamat" name="alamat" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="telepon">Nomor Telepon</label>
-                        <input type="tel" id="telepon" name="telepon" required>
-                    </div>
-
-                    <hr>
-
-                    <h3>Pilih Metode Pembayaran</h3>
-                    
-                    <div class="pilihan-pembayaran">
-                        <input type="radio" id="ewallet" name="metode_bayar" value="ewallet" required>
-                        <label for="ewallet">💳 E-Wallet (Gopay, OVO, Dana)</label>
-                        <div class="detail-bayar ewallet-detail">
-                            <p>Pembayaran akan diarahkan ke aplikasi E-Wallet setelah klik 'Bayar Sekarang'.</p>
-                        </div>
-                    </div>
-
-                    <div class="pilihan-pembayaran">
-                        <input type="radio" id="transfer" name="metode_bayar" value="transfer">
-                        <label for="transfer">🏦 Transfer Bank (BCA, Mandiri, BRI)</label>
-                        <div class="detail-bayar transfer-detail">
-                            <p>Transfer ke Rekening **BCA 1234567890** a.n. Toko Buah Segar. Kirim bukti transfer setelahnya.</p>
-                        </div>
-                    </div>
-
-                    <div class="pilihan-pembayaran">
-                        <input type="radio" id="cod" name="metode_bayar" value="cod">
-                        <label for="cod">💵 Cash On Delivery (COD)</label>
-                        <div class="detail-bayar cod-detail">
-                            <p>**Bayar tunai** saat buah diterima. Berlaku untuk area tertentu (Biaya COD: Rp 5.000).</p>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="tombol-bayar" disabled id="checkout-button">Bayar Sekarang</button>
-                    <p class="peringatan" id="peringatan-keranjang">**Keranjang kosong.** Silakan pilih produk terlebih dahulu.</p>
-                </form>
-            </div>
-        </section>
-
-        <section id="cara-pesan" class="container">
-            <h2>Cara Pemesanan</h2>
-            <ol>
-                <li>Pilih buah yang Anda inginkan dari bagian Produk.</li>
-                <li>Klik tombol Tambah ke Keranjang.</li>
-                <li>Cek ulang pesanan Anda di bagian Keranjang & Checkout.</li>
-                <li>Isi Informasi Pengiriman dengan lengkap.</li>
-                <li>Pilih Metode Pembayaran yang Anda inginkan.</li>
-                <li>Klik Bayar Sekarang dan ikuti instruksi pembayaran.</li>
-            </ol>
-        </section>
-
-    </main>
-
-    <footer id="kontak">
-        <div class="container">
-            <p>&copy; 2025 Toko Buah Segar Online. | Hubungi Kami: **085233573962**</p>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Toko Buah Segar Online | Checkout</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <header>
-        <div class="container header-content">
-            <h1>Toko Buah Segar 🛒</h1>
-            <nav>
-                <a href="#produk">Produk</a>
-                <a href="#cara-pesan">Cara Pesan</a>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        <section id="produk" class="container">
-            <h2>Buah Segar Pilihan 🍎🍌</h2>
-            <div class="produk-grid">
-                <div class="produk-item">
-                    <img src="applefuji.png" alt="Apel Fuji">
-                    <h3>Apel Fuji Premium</h3>
-                    <p class="deskripsi">Manis renyah, kualitas impor terbaik.</p>
-                    <p class="harga" data-price="35000">Rp 35.000 / kg</p>
-                    <button class="tambah-keranjang" data-id="1" data-nama="Apel Fuji Premium" data-harga="35000">Tambah ke Keranjang</button>
-                </div>
-                <div class="produk-item">
-                    <img src="pisangg.jpg" alt="Pisang Cavendish">
-                    <h3>Pisang Cavendish</h3>
-                    <p class="deskripsi">Kaya energi, cocok untuk segala usia.</p>
-                    <p class="harga" data-price="20000">Rp 20.000 / sisir</p>
-                    <button class="tambah-keranjang" data-id="2" data-nama="Pisang Cavendish" data-harga="20000">Tambah ke Keranjang</button>
-                </div>
-                <div class="produk-item">
-                    <img src="jerukk.jpg" alt="Jeruk Sunkist">
-                    <h3>Jeruk Sunkist</h3>
-                    <p class="deskripsi">Segar dan kaya Vitamin C.</p>
-                    <p class="harga" data-price="25000">Rp 25.000 / kg</p>
-                    <button class="tambah-keranjang" data-id="3" data-nama="Jeruk Sunkist" data-harga="25000">Tambah ke Keranjang</button>
-                </div>
-            </div>
-        </section>
+        // Kontrol Tombol dan Peringatan
+        if (subtotal > 0) {
+            checkoutButton.disabled = false;
+            keranjangPeringatan.style.display = 'none';
+        } else {
+            checkoutButton.disabled = true;
+            keranjangPeringatan.style.display = 'block';
+        }
         
-        <hr>
+        return { subtotal, finalTotal };
+    }
 
-        <section id="checkout" class="container">
-            <h2>Keranjang & Checkout 🧺</h2>
-            <div class="checkout-content">
-                
-                <div class="keranjang-detail">
-                    <h3>Daftar Belanja Anda</h3>
-                    <ul id="daftar-keranjang">
-                        </ul>
-                    <p class="keranjang-total">Total Belanja: <span id="total-belanja">Rp 0</span></p>
-                    <p class="keranjang-total">Ongkos Kirim: <span id="ongkir">Rp 10.000</span></p>
-                    <p class="grand-total">**Total Bayar:** <span id="grand-total">**Rp 10.000**</span></p>
-                </div>
+    function updateCartList() {
+        cartList.innerHTML = ''; // Kosongkan daftar keranjang
+        
+        if (cart.length === 0) {
+            cartList.innerHTML = '<li>Keranjang belanja Anda masih kosong.</li>';
+        }
 
-                <form id="pembayaran-form">
-                    <h3>Informasi Pengiriman</h3>
-                    <div class="form-group">
-                        <label for="nama">Nama Lengkap</label>
-                        <input type="text" id="nama" name="nama" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="alamat">Alamat Lengkap</label>
-                        <textarea id="alamat" name="alamat" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="telepon">Nomor Telepon</label>
-                        <input type="tel" id="telepon" name="telepon" required>
-                    </div>
+        cart.forEach((item, index) => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                ${item.name} (${formatRupiah(item.price)}) x ${item.quantity} 
+                = <strong>${formatRupiah(item.price * item.quantity)}</strong> 
+                <button class="hapus-item" data-index="${index}">[X]</button>
+            `;
+            cartList.appendChild(listItem);
+        });
 
-                    <hr>
+        // Tambahkan event listener untuk tombol hapus
+        document.querySelectorAll('.hapus-item').forEach(button => {
+            button.addEventListener('click', function() {
+                const itemIndex = parseInt(this.getAttribute('data-index'));
+                cart.splice(itemIndex, 1); // Hapus 1 item dari array
+                updateCartList();
+                calculateTotals();
+            });
+        });
+    }
 
-                    <h3>Pilih Metode Pembayaran</h3>
-                    
-                    <div class="pilihan-pembayaran">
-                        <input type="radio" id="ewallet" name="metode_bayar" value="ewallet" required>
-                        <label for="ewallet">💳 E-Wallet (Gopay, OVO, Dana)</label>
-                        <div class="detail-bayar ewallet-detail">
-                            <p>Pembayaran akan diarahkan ke aplikasi E-Wallet setelah klik 'Bayar Sekarang'.</p>
-                        </div>
-                    </div>
+    // Event Listener untuk tombol "Tambah ke Keranjang"
+    productButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const productId = this.getAttribute('data-id');
+            const productName = this.getAttribute('data-nama');
+            const productPrice = parseInt(this.getAttribute('data-harga'));
 
-                    <div class="pilihan-pembayaran">
-                        <input type="radio" id="transfer" name="metode_bayar" value="transfer">
-                        <label for="transfer">🏦 Transfer Bank (BCA, Mandiri, BRI)</label>
-                        <div class="detail-bayar transfer-detail">
-                            <p>Transfer ke Rekening **BCA 1234567890** a.n. Toko Buah Segar. Kirim bukti transfer setelahnya.</p>
-                        </div>
-                    </div>
+            const existingItem = cart.find(item => item.id === productId);
 
-                    <div class="pilihan-pembayaran">
-                        <input type="radio" id="cod" name="metode_bayar" value="cod">
-                        <label for="cod">💵 Cash On Delivery (COD)</label>
-                        <div class="detail-bayar cod-detail">
-                            <p>**Bayar tunai** saat buah diterima. Berlaku untuk area tertentu (Biaya COD: Rp 5.000).</p>
-                        </div>
-                    </div>
-                    
-                    <button type="submit" class="tombol-bayar" disabled id="checkout-button">Bayar Sekarang</button>
-                    <p class="peringatan" id="peringatan-keranjang">**Keranjang kosong.** Silakan pilih produk terlebih dahulu.</p>
-                </form>
-            </div>
-        </section>
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ id: productId, name: productName, price: productPrice, quantity: 1 });
+            }
 
-        <section id="cara-pesan" class="container">
-            <h2>Cara Pemesanan</h2>
-            <ol>
-                <li>Pilih buah yang Anda inginkan dari bagian **Produk**.</li>
-                <li>Klik tombol **Tambah ke Keranjang**.</li>
-                <li>Cek ulang pesanan Anda di bagian **Keranjang & Checkout**.</li>
-                <li>Isi **Informasi Pengiriman** dengan lengkap.</li>
-                <li>Pilih **Metode Pembayaran** yang Anda inginkan.</li>
-                <li>Klik **Bayar Sekarang** dan ikuti instruksi pembayaran.</li>
-            </ol>
-        </section>
+            alert(`${productName} berhasil ditambahkan!`);
+            updateCartList();
+            calculateTotals();
+        });
+    });
+    
+    // --- 5. Logika Pilihan Pembayaran & Biaya ---
 
-    </main>
+    function hideAllDetails() {
+        detailContainers.forEach(detail => {
+            detail.style.display = 'none';
+        });
+    }
 
-    <footer id="kontak">
-        <div class="container">
-            <p>&copy; 2025 Toko Buah Segar Online. | Hubungi Kami: **085233573962**</p>
-        </div>
-    </footer>
+    paymentRadios.forEach(radio => {
+        radio.addEventListener('change', (event) => {
+            hideAllDetails(); 
+            const selectedValue = event.target.value;
+            const detailElement = document.querySelector(`.${selectedValue}-detail`);
+            
+            currentFee = 0;
+            if (selectedValue === 'cod') {
+                currentFee = COD_FEE;
+            }
+            
+            if (detailElement) {
+                detailElement.style.display = 'block';
+            }
+            
+            calculateTotals(); 
+        });
+    });
 
-    <script src="script.js"></script>
-</body>
-</html>
+    hideAllDetails();
+    
+    // --- 6. Simulasi Proses Checkout (Form Submit) ---
+
+    checkoutForm.addEventListener('submit', function(event) {
+        event.preventDefault(); 
+        
+        const { subtotal, finalTotal } = calculateTotals();
+        
+        if (subtotal === 0) {
+             alert('Keranjang belanja Anda masih kosong.');
+             return;
+        }
+
+        const selectedMethod = document.querySelector('input[name="metode_bayar"]:checked');
+        const deliveryInfo = {
+            nama: document.getElementById('nama').value,
+            alamat: document.getElementById('alamat').value,
+            telepon: document.getElementById('telepon').value
+        };
+        const method = selectedMethod.value.toUpperCase();
+        
+        // KIRIM KE WHATSAPP
+        sendToWhatsApp(deliveryInfo, method, subtotal, finalTotal);
+        
+        alert(`Pesanan berhasil diproses! Silakan cek WhatsApp Anda untuk detail pesanan dan pembayaran.`);
+
+        // Reset state setelah simulasi checkout
+        cart = [];
+        currentFee = 0;
+        updateCartList();
+        calculateTotals();
+        checkoutForm.reset();
+        hideAllDetails();
+    });
+    
+    // --- 7. Fungsi Pengiriman ke WhatsApp (DIUPDATE) ---
+    
+    function getPackagingRecommendation(subtotal) {
+        if (subtotal > 80000) {
+            return "Karena jumlah pesanan besar, kami merekomendasikan **Kardus Ramah Lingkungan** agar buah aman (free biaya packaging).";
+        } else if (subtotal > 40000) {
+            return "Pilih salah satu: **(A) Paper Bag Ramah Lingkungan** atau **(B) Kantong Plastik Kuat**.";
+        } else {
+            return "Pilih salah satu: **(A) Paper Bag** atau **(B) Kantong Plastik** (standar).";
+        }
+    }
+
+    function sendToWhatsApp(info, method, subtotal, finalTotal) {
+        const date = new Date().toLocaleDateString('id-ID');
+        
+        // 1. Buat detail item
+        let itemDetails = cart.map(item => 
+            `  - ${item.name} (${formatRupiah(item.price)}) x ${item.quantity} = ${formatRupiah(item.price * item.quantity)}`
+        ).join('\n');
+        
+        // 2. Tentukan deskripsi pembayaran
+        let paymentDescription = `Metode Pembayaran: *${method}*`;
+        let paymentInstruction = "";
+        
+        if (method === 'TRANSFER') {
+            paymentDescription = `Transfer Bank`;
+            paymentInstruction = `*Instruksi:* Segera transfer ${formatRupiah(finalTotal)} ke BCA 1234567890 (a.n. Toko Buah Segar) dan kirim bukti transfer.`;
+        } else if (method === 'COD') {
+            paymentDescription = `Cash On Delivery (COD)`;
+            paymentInstruction = `*Instruksi:* Siapkan uang tunai sebesar ${formatRupiah(finalTotal)} saat kurir tiba. Biaya COD: ${formatRupiah(COD_FEE)}.`;
+        } else if (method === 'EWALLET') {
+            paymentDescription = `E-Wallet`;
+            paymentInstruction = `*Instruksi:* Link pembayaran E-Wallet akan dikirim setelah konfirmasi pesanan.`;
+        }
+        
+        // 3. Tentukan rekomendasi packaging
+        const packaging = getPackagingRecommendation(subtotal);
+
+        // 4. Susun teks pesan
+        const messageText = `
+*--- 🧾 DETAIL PESANAN TOKO BUAH SEGAR ---*
+Tanggal: ${date}
+
+*INFORMASI PELANGGAN*
+Nama: ${info.nama}
+Telepon: ${info.telepon}
+Alamat: ${info.alamat}
+
+*ITEM PESANAN*
+${itemDetails}
+
+*RINGKASAN BIAYA*
+Subtotal: ${formatRupiah(subtotal)}
+Ongkos Kirim: ${formatRupiah(SHIPPING_COST)}
+Biaya Layanan (${paymentDescription === 'Cash On Delivery (COD)' ? 'COD' : 'Lain-lain'}): ${formatRupiah(currentFee)}
+*TOTAL BAYAR: ${formatRupiah(finalTotal)}*
+
+*INSTRUKSI PEMBAYARAN*
+Metode: ${paymentDescription}
+${paymentInstruction}
+
+*REKOMENDASI PACKAGING*
+> ${packaging}
+> Mohon balas pesan ini dengan pilihan packaging Anda (A/B/Kardus).
+
+Terima kasih atas pesanannya! Kami akan segera memproses.
+        `.trim();
+
+        // 5. Buat link WhatsApp
+        // Menggunakan nomor telepon yang dimasukkan user sebagai tujuan (jika valid, kalau tidak, ganti dengan nomor toko)
+        const waNumber = info.telepon.startsWith('0') ? '62' + info.telepon.substring(1) : info.telepon;
+        const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(messageText)}`;
+        
+        // Buka jendela baru ke WhatsApp (Simulasi)
+        window.open(waLink, '_blank');
+    }
+    
+    // Inisialisasi awal
+    updateCartList();
+    calculateTotals();
+});

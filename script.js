@@ -109,21 +109,18 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // --- 5. Logika Pilihan Pembayaran & Biaya ---
 
-    // Fungsi untuk menyembunyikan semua detail pembayaran
     function hideAllDetails() {
         detailContainers.forEach(detail => {
             detail.style.display = 'none';
         });
     }
 
-    // Event Listener untuk radio button pembayaran
     paymentRadios.forEach(radio => {
         radio.addEventListener('change', (event) => {
             hideAllDetails(); 
             const selectedValue = event.target.value;
             const detailElement = document.querySelector(`.${selectedValue}-detail`);
             
-            // Atur biaya tambahan/fee berdasarkan metode
             currentFee = 0;
             if (selectedValue === 'cod') {
                 currentFee = COD_FEE;
@@ -133,12 +130,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 detailElement.style.display = 'block';
             }
             
-            // Recalculate total
             calculateTotals(); 
         });
     });
 
-    // Sembunyikan detail saat script dimuat
     hideAllDetails();
     
     // --- 6. Simulasi Proses Checkout (Form Submit) ---
@@ -175,15 +170,15 @@ document.addEventListener('DOMContentLoaded', function() {
         hideAllDetails();
     });
     
-    // --- 7. Fungsi Pengiriman ke WhatsApp ---
+    // --- 7. Fungsi Pengiriman ke WhatsApp (DIUPDATE) ---
     
     function getPackagingRecommendation(subtotal) {
-        if (subtotal > 100000) {
-            return "Kami merekomendasikan **Kotak Kargo Berpendingin** (jika tersedia) atau kemasan kardus ganda untuk menjaga kesegaran optimal.";
-        } else if (subtotal > 50000) {
-            return "Kemasan standar kami sudah menggunakan **kotak kardus kokoh** dan bantalan busa.";
+        if (subtotal > 80000) {
+            return "Karena jumlah pesanan besar, kami merekomendasikan **Kardus Ramah Lingkungan** agar buah aman (free biaya packaging).";
+        } else if (subtotal > 40000) {
+            return "Pilih salah satu: **(A) Paper Bag Ramah Lingkungan** atau **(B) Kantong Plastik Kuat**.";
         } else {
-            return "Kemasan standar (kantong tebal/kardus kecil) akan digunakan.";
+            return "Pilih salah satu: **(A) Paper Bag** atau **(B) Kantong Plastik** (standar).";
         }
     }
 
@@ -201,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (method === 'TRANSFER') {
             paymentDescription = `Transfer Bank`;
-            paymentInstruction = `*Instruksi:* Segera transfer ke BCA 1234567890 (a.n. Toko Buah Segar) dan kirim bukti transfer.`;
+            paymentInstruction = `*Instruksi:* Segera transfer ${formatRupiah(finalTotal)} ke BCA 1234567890 (a.n. Toko Buah Segar) dan kirim bukti transfer.`;
         } else if (method === 'COD') {
             paymentDescription = `Cash On Delivery (COD)`;
             paymentInstruction = `*Instruksi:* Siapkan uang tunai sebesar ${formatRupiah(finalTotal)} saat kurir tiba. Biaya COD: ${formatRupiah(COD_FEE)}.`;
@@ -238,17 +233,18 @@ ${paymentInstruction}
 
 *REKOMENDASI PACKAGING*
 > ${packaging}
+> Mohon balas pesan ini dengan pilihan packaging Anda (A/B/Kardus).
 
 Terima kasih atas pesanannya! Kami akan segera memproses.
         `.trim();
 
         // 5. Buat link WhatsApp
-        const waLink = `https://wa.me/${info.telepon}?text=${encodeURIComponent(messageText)}`;
+        // Menggunakan nomor telepon yang dimasukkan user sebagai tujuan (jika valid, kalau tidak, ganti dengan nomor toko)
+        const waNumber = info.telepon.startsWith('0') ? '62' + info.telepon.substring(1) : info.telepon;
+        const waLink = `https://wa.me/${waNumber}?text=${encodeURIComponent(messageText)}`;
         
         // Buka jendela baru ke WhatsApp (Simulasi)
         window.open(waLink, '_blank');
-        
-        console.log("Pesan WhatsApp Dibuat:", messageText);
     }
     
     // Inisialisasi awal

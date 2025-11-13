@@ -81,12 +81,29 @@
                     <h3>Pilih Metode Pembayaran</h3>
                     
                     <div class="pilihan-pembayaran">
-                        <input type="radio" id="whatsapp" name="metode_bayar" value="whatsapp" required>
-                        <label for="whatsapp">📱 Via WhatsApp</label>
-                        <div class="detail-bayar whatsapp-detail">
-                            <p>Admin kami akan menghubungi Anda di nomor telepon yang terdaftar untuk konfirmasi pesanan dan instruksi pembayaran.</p>
+                        <input type="radio" id="ewallet" name="metode_bayar" value="ewallet" required>
+                        <label for="ewallet">💳 E-Wallet (Gopay, OVO, Dana)</label>
+                        <div class="detail-bayar ewallet-detail">
+                            <p>Pembayaran akan diarahkan ke aplikasi E-Wallet setelah klik 'Bayar Sekarang'.</p>
                         </div>
                     </div>
+
+                    <div class="pilihan-pembayaran">
+                        <input type="radio" id="transfer" name="metode_bayar" value="transfer">
+                        <label for="transfer">🏦 Transfer Bank (BCA, Mandiri, BRI)</label>
+                        <div class="detail-bayar transfer-detail">
+                            <p>Transfer ke Rekening **BCA 1234567890** a.n. Toko Buah Segar. Kirim bukti transfer setelahnya.</p>
+                        </div>
+                    </div>
+
+                    <div class="pilihan-pembayaran">
+                        <input type="radio" id="cod" name="metode_bayar" value="cod">
+                        <label for="cod">💵 Cash On Delivery (COD)</label>
+                        <div class="detail-bayar cod-detail">
+                            <p>**Bayar tunai** saat buah diterima. Berlaku untuk area tertentu (Biaya COD: Rp 5.000).</p>
+                        </div>
+                    </div>
+                    
                     <button type="submit" class="tombol-bayar" disabled id="checkout-button">Bayar Sekarang</button>
                     <p class="peringatan" id="peringatan-keranjang">**Keranjang kosong.** Silakan pilih produk terlebih dahulu.</p>
                 </form>
